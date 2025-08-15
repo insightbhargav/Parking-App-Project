@@ -9,5 +9,4 @@ How to run the app?
     http://localhost:5000/login
 
 4. Use the following default credentials to log in:
-    • Admin → Username: admin, Password: admin123
-    • User1 → Username: user1, Password: user123
+    Admin → Username: admin, Password: admin123
