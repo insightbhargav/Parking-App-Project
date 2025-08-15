@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+     <!--CSS file-->
+    <link rel="stylesheet" href="..\static\css\style.css">
+
+    <!--Icons Import-->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+  <div class="container" style="height: 750px;">
+    <div class="form-box login">
+      <form method="POST" action="{{ url_for('main.user_signup') }}">
+  <h1>Register</h1>
+
+  <div class="input-box">
+    <input type="text" name="full_name" placeholder="Full Name" required>
+    <i class='bx bxs-user'></i>
+  </div>
+
+  <div class="input-box">
+    <input type="text" name="pincode" placeholder="Pincode" required>
+    <i class='bx bxs-map'></i>
+  </div>
+
+  <div class="input-box">
+    <input type="text" name="address" placeholder="Address" required>
+    <i class='bx bxs-location-plus'></i>
+  </div>
+
+  <div class="input-box">
+    <input type="text" name="uname" placeholder="Select Username" required>
+    <i class='bx bxs-user'></i>
+  </div>
+
+  <div class="input-box">
+    <input type="password" name="upass" placeholder="Select Password" required>
+    <i class="bx bxs-lock-alt"></i>
+  </div>
+
+  <div class="submit-btn">
+    <button type="submit" class="btn" style="margin-top: 20px;">Register</button>
+  </div>
+</form>
+        <div class="below-panel">
+          <p>OR<br>Already have an account?</p>
+          <a href="{{ url_for('main.combined_login') }}">
+            <button class="register-btn">Login</button>
+          </a>
+        </div>
+      </div>
+    </div>
+</body>
+</html>

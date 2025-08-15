@@ -1,0 +1,85 @@
+{% extends "admin_core.html" %}
+
+{% block title %}Admin Home{% endblock %}
+
+{% block content %}
+<div class="container" style="margin: 40px;">
+
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flashes" style="color: red; list-style: none; padding: 0; position: absolute; right: 50px; margin-top: 100px;">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <h1 style="margin: 50px;">Admin Home</h1>
+  <a class="new-btn" href="{{ url_for('main.add_lot') }}" style="margin: 50px;">+ Add New Lot</a>
+
+  <h2 style="margin: 50px;">All Parking Lots</h2>
+
+  {% for lot in lots %}
+    <div class="lot-box" style="margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 6px;">
+      <p><strong>Name:</strong> {{ lot.name }}</p>
+      <p><strong>Address:</strong> {{ lot.address }}</p>
+      <p><strong>Pincode:</strong> {{ lot.pincode }}</p>
+      <p><strong>Price:</strong> ₹{{ lot.price }}</p>
+      <p><strong>Max Spots:</strong> {{ lot.max_spots }}</p>
+      <form method="POST" action="{{ url_for('main.delete_lot', lot_id=lot.id) }}">
+        <button type="submit" class="new-btn">Delete</button>
+      </form>
+    </div>
+  {% endfor %}
+
+  <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: flex-start;">
+    {% for lot in lots %}
+      <div style="width: 350px; height: 400px; border: 2px solid #ccc; border-radius: 10px; padding: 15px; background-color: #f9f9f9; overflow: auto; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <h3 style="margin: 0;">{{ lot.name }}</h3>
+          <button onclick="openEditModal({{ lot.id }}, '{{ lot.address }}', '{{ lot.pincode }}', {{ lot.max_spots }})" style="padding: 4px 8px; font-size: 14px;">Edit</button>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+          {% for spot in spots_map[lot.id] %}
+            <div style="width: 50px; height: 50px; border: 1px solid #ccc; text-align: center; line-height: 50px; border-radius: 4px; background-color: {% if spot.status == 'E' %}lightgreen{% else %}salmon{% endif %};">
+              {{ spot.id }}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+<div id="editModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:20px; border:1px solid #ccc; border-radius:8px; z-index:9999; box-shadow:0 0 10px rgba(0,0,0,0.2);">
+  <form method="POST" id="editLotForm" action="{{ url_for('main.edit_lot') }}">
+    <input type="hidden" name="lot_id" id="modal_lot_id">
+    
+    <label>Max Spots:</label><br>
+    <input type="number" name="max_spots" id="modal_max_spots" required><br><br>
+    
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </form>
+  
+  <form method="POST" id="modalDeleteForm" style="margin-top:10px;">
+    <button type="submit" class="btn btn-danger">Delete Lot</button>
+  </form>
+  
+  <button type="button" onclick="closeEditModal()" style="margin-top:10px;">Cancel</button>
+</div>
+
+<script>
+  function openEditModal(id, maxSpots) {
+    document.getElementById("modal_lot_id").value = id;
+    document.getElementById("modal_max_spots").value = ""; 
+    document.getElementById("modalDeleteForm").action = "/admin/delete-lot/" + id;
+    document.getElementById("editModal").style.display = "block";
+  }
+
+  function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+  }
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "core.html" %}
+
+{% block title %}Release Summary{% endblock %}
+
+{% block content %}
+<div style="margin: 50px 50px 50px 50px;">
+    <h2>Release Summary</h2>
+
+    <p><strong>Spot ID:</strong> {{ spot.id }}</p>
+
+    <p><strong>Vehicle No:</strong> {{ vehicle_no }}</p>
+    <p><strong>Lot:</strong> {{ lot.name }}</p>
+    <p><strong>location:</strong> {{ lot.address }}</p>
+    <p><strong>In Time:</strong> {{ spot.in_time }}</p>
+    <p><strong>Out Time:</strong> {{ spot.out_time }}</p>
+    <p><strong>Duration:</strong> {{ duration | round(2) }} hours</p>
+    <p><strong>Total Cost:</strong> ₹ {{ cost }}</p>
+
+    <a class="new-btn" href="{{ url_for('main.user_dashboard') }}">Back to Dashboard</a>
+</div>
+{% endblock %}

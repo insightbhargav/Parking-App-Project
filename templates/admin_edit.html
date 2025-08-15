@@ -1,0 +1,28 @@
+{% extends "admin_core.html" %}
+
+{% block title %}Edit Admin Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+  <h2 class="mb-4 text-center">Edit Profile</h2>
+
+  <form method="POST" action="{{ url_for('main.admin_edit') }}">
+    <div class="mb-3">
+      <label for="full_name" class="form-label">Full Name</label>
+      <input type="text" name="full_name" id="full_name" class="form-control" value="{{ current_user.full_name }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="pincode" class="form-label">Pincode</label>
+      <input type="text" name="pincode" id="pincode" class="form-control" value="{{ current_user.pincode }}" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="address" class="form-label">Address</label>
+      <textarea name="address" id="address" class="form-control" rows="3" required>{{ current_user.address }}</textarea>
+    </div>
+
+    <button type="submit" class="new-btn">Save Changes</button>
+  </form>
+</div>
+{% endblock %}

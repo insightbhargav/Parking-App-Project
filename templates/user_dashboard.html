@@ -1,0 +1,184 @@
+{% extends "core.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<style>
+  #popup, #releasePopup {
+    display: none;
+    position: fixed;
+    top: 20%;
+    left: 35%;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 20px;
+    z-index: 10;
+  }
+  #popupOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.3);
+    display: none;
+    z-index: 5;
+  }
+</style>
+
+{% if current_user.is_authenticated %}
+  <h3 class="h-style">Your Current Spots:</h3>
+  {% set ns = namespace(active_spots=[]) %}
+  {% for lot in lots %}
+    {% for spot in lot.spots %}
+      {% if spot.user_id == current_user.id and spot.status == 'O' %}
+        {% set _ = ns.active_spots.append(spot) %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+
+  {% if ns.active_spots %}
+    <ul style="margin: 30px 20px 60px 20px; list-style: none; font-size: 19px; font-weight: 400;">
+      {% for s in ns.active_spots %}
+        <li style="display: flex; justify-content: space-between; width: 70%;">
+          Spot {{ s.id }}
+          <button class="new-btn" onclick="openReleasePopup({{ s.id }})">Release</button>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p style="margin: 30px 20px 30px 20px; list-style: none; font-size: 19px; font-weight: 300;">You are not currently parked.</p>
+  {% endif %}
+{% endif %}
+
+<hr>
+
+<h2 class="h-style" style="text-align: center;">Available Parking Lots</h2>
+
+<div style="display: flex; justify-content: center; margin-top: 40px;" class="input-box">
+  <form method="GET" action="{{ url_for('main.user_dashboard') }}" style="text-align: center;">
+    <input type="text" name="location" placeholder="Search by address" value="{{ search_location }}">
+    <button type="submit" class="new-btn">Search</button>
+  </form>
+</div>
+
+{% if searched %}
+  {% if lots %}
+    <h2 style="text-align: center; margin-top: 40px;">Search Results for "{{ search_location }}"</h2>
+    {% for lot in lots %}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 50px;">
+        <h3 style="font-weight: 400; font-size: 40px;">{{ lot.name }}</h3>
+        <p style="margin: 0 auto;">Available Spots: {{ lot.spots | selectattr('status', 'equalto', 'E') | list | length }}</p>
+        {% if current_user.is_authenticated %}
+          <button onclick="openPopup({{ lot.id }}, {{ current_user.id }})" class="new-btn">Park Here</button>
+        {% endif %}
+      </div>
+      <hr>
+    {% endfor %}
+  {% else %}
+    <p style="text-align: center;">No lots found for "{{ search_location }}"</p>
+  {% endif %}
+{% else %}
+  {% for lot in lots %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 50px;">
+      <h3 style="font-weight: 400; font-size: 40px;">{{ lot.name }}</h3>
+      <p style="margin: 0 auto;">Available Spots: {{ lot.spots | selectattr('status', 'equalto', 'E') | list | length }}</p>
+      {% if current_user.is_authenticated %}
+        <button onclick="openPopup({{ lot.id }}, {{ current_user.id }})" class="new-btn">Park Here</button>
+      {% endif %}
+    </div>
+    <hr>
+  {% endfor %}
+{% endif %}
+
+<div style="background-color: #57564F; height: 280px;">
+  <form method="GET" action="{{ url_for('main.logout') }}">
+    <button type="submit" class="new-btn" style="margin: 70px 50px 50px 50px;">Logout</button>
+  </form>
+  {% if current_user.is_authenticated %}
+    <p style="margin: 20px 40px 80px 50px; font-size: 20px; color: #fff;"><strong style="color: #fff;">Total Bookings Made:</strong> {{ total_bookings }}</p>
+  {% endif %}
+</div>
+
+<div id="popupOverlay"></div>
+
+<div id="popup">
+  <form method="POST" id="popupForm" action="">
+    <h3>Confirm Parking</h3>
+    <p>User ID: <span id="userIdDisplay"></span></p>
+    <p>Lot ID: <span id="lotIdDisplay"></span></p>
+    <p>Location: <span id="lotLocationDisplay"></span></p>
+    <input type="hidden" name="lot_id" id="lotIdInput">
+
+    <label>Vehicle Number:</label><br>
+    <input type="text" name="vehicle_no" required><br><br>
+
+    <button type="submit">Book</button>
+    <button type="button" onclick="closePopup()">Cancel</button>
+  </form>
+</div>
+
+<div id="releasePopup">
+  <form method="POST" id="releaseForm" action="/user/release">
+    <h3>Release Summary</h3>
+    <input type="hidden" name="spot_id" id="releaseSpotId">
+
+    <p><strong>Spot ID:</strong> <span id="releaseSpotDisplay"></span></p>
+    <p><strong>Vehicle No:</strong> <span id="releaseVehicleNo"></span></p>
+    <p><strong>In Time:</strong> <span id="releaseInTime"></span></p>
+    <p><strong>Out Time:</strong> <span id="releaseOutTime"></span></p>
+    <p><strong>Total Cost:</strong> ₹ <span id="releaseCost"></span></p>
+
+    <button type="submit">Confirm Release</button>
+    <button type="button" onclick="closeReleasePopup()">Cancel</button>
+  </form>
+</div>
+
+<script>
+  const lotData = {{ lot_data | tojson | safe }};
+</script>
+
+<script>
+  function openPopup(lotId, userId) {
+    const lot = lotData.find(l => l.id === lotId);
+    document.getElementById("lotIdDisplay").innerText = lotId;
+    document.getElementById("userIdDisplay").innerText = userId;
+    document.getElementById("lotIdInput").value = lotId;
+    document.getElementById("lotLocationDisplay").innerText = lot?.location || 'N/A';
+    document.getElementById("popupForm").action = `/user/park/${lotId}`;
+    document.getElementById("popupOverlay").style.display = "block";
+    document.getElementById("popup").style.display = "block";
+  }
+
+  function closePopup() {
+    document.getElementById("popupOverlay").style.display = "none";
+    document.getElementById("popup").style.display = "none";
+  }
+
+  function openReleasePopup(spotId) {
+    fetch(`/api/spot/${spotId}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("releaseSpotId").value = spotId;
+        document.getElementById("releaseSpotDisplay").innerText = data.spot_id;
+        document.getElementById("releaseVehicleNo").innerText = data.vehicle_no;
+        document.getElementById("releaseInTime").innerText = data.in_time;
+        document.getElementById("releaseOutTime").innerText = data.out_time;
+        document.getElementById("releaseCost").innerText = data.total_cost;
+
+        document.getElementById("popupOverlay").style.display = "block";
+        document.getElementById("releasePopup").style.display = "block";
+      });
+  }
+
+  function closeReleasePopup() {
+    document.getElementById("popupOverlay").style.display = "none";
+    document.getElementById("releasePopup").style.display = "none";
+  }
+
+  window.openPopup = openPopup;
+  window.closePopup = closePopup;
+  window.openReleasePopup = openReleasePopup;
+  window.closeReleasePopup = closeReleasePopup;
+</script>
+{% endblock %}

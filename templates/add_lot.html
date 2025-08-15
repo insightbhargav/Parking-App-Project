@@ -1,0 +1,19 @@
+{% extends "admin_core.html" %}
+
+{% block title %}Add Parking Lot{% endblock %}
+
+{% block content %}
+<div class="input-box" style="display: flex; justify-content: center; align-items: center; height: 80vh; width: 100%;">
+  <form method="POST" action="{{ url_for('main.add_lot') }}"
+        style="background: #fff; padding: 30px; border-radius: 8px;
+               box-shadow: 0 0 10px rgba(0,0,0,0.1); display: flex;
+               flex-direction: column; gap: 15px; width: 300px;">
+    <input name="name" placeholder="Lot Name" required>
+    <input name="address" placeholder="Location" required>
+    <input name="pincode" placeholder="Pincode" required>
+    <input name="price" placeholder="Price" required>
+    <input name="max_spots" placeholder="Max Spots" required>
+    <button type="submit" class="new-btn">Add Lot</button>
+  </form>
+</div>
+{% endblock %}

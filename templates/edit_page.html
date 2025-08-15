@@ -1,0 +1,29 @@
+{% extends "core.html" %}
+
+{% block title %}Edit Profile{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin-top: 40px;">
+  <h2>Edit Profile</h2>
+
+  <form method="POST" action="{{ url_for('main.edit_profile') }}">
+>
+    <div class="input-box">
+      <label for="full_name">Full Name</label>
+      <input type="text" name="full_name" id="full_name" value="{{ current_user.full_name }}" required>
+    </div>
+
+    <div class="input-box">
+      <label for="pincode">Pincode</label>
+      <input type="text" name="pincode" id="pincode" value="{{ current_user.pincode }}" required>
+    </div>
+
+    <div class="input-box">
+      <label for="address">Address</label>
+      <input type="text" name="address" id="address" value="{{ current_user.address }}" required>
+    </div>
+
+    <button type="submit" class="btn" style="margin-top: 20px;">Update</button>
+  </form>
+</div>
+{% endblock %}

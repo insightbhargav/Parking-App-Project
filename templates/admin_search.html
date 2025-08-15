@@ -1,0 +1,116 @@
+{% extends "admin_core.html" %}
+{% block title %}Admin Search{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Search Users & Parking Lots</h2>
+
+  <form method="GET" action="{{ url_for('main.admin_search') }}" class="d-flex align-items-center gap-3 mb-4 input-box">
+    <input type="text" name="query" placeholder="Enter Lot ID, Address, or Pincode" class="form-control" style="max-width: 400px;">
+    <button type="submit" class="new-btn">Search</button>
+  </form>
+
+  <hr>
+
+  {% if filter != 'lot' %}
+    <h4 class="mt-4">Users</h4>
+    <ul class="list-group mb-4">
+      {% for user in users %}
+        <li class="list-group-item">
+          <strong>{{ user.username }}</strong> – {{ user.address }}, {{ user.pincode }}
+        </li>
+      {% else %}
+        <li class="list-group-item text-muted">No users found.</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% if filter != 'user' %}
+    <h4>Parking Lots</h4>
+    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+      {% for lot in lots %}
+        <div style="
+          width: 350px;
+          height: 400px;
+          border: 2px solid #ccc;
+          border-radius: 10px;
+          padding: 15px;
+          background-color: #f9f9f9;
+          overflow: auto;
+          box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h5 style="margin: 0;">{{ lot.name }}</h5>
+            <button onclick="openEditModal({{ lot.id }}, '{{ lot.name }}', '{{ lot.address }}', '{{ lot.pincode }}', {{ lot.max_spots }})"
+                    class="btn btn-sm btn-outline-primary">Edit</button>
+          </div>
+
+          <p><strong>Address:</strong> {{ lot.address }}</p>
+          <p><strong>Pincode:</strong> {{ lot.pincode }}</p>
+          <p><strong>Price:</strong> ₹{{ lot.price }}</p>
+          <p><strong>Max Spots:</strong> {{ lot.max_spots }}</p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+            {% for spot in spots_map[lot.id] %}
+              <div style="
+                width: 40px;
+                height: 40px;
+                border: 1px solid #ccc;
+                text-align: center;
+                line-height: 40px;
+                border-radius: 4px;
+                background-color: {% if spot.status == 'E' %}lightgreen{% else %}salmon{% endif %};">
+                {{ spot.id }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% else %}
+        <p class="text-muted">No lots found.</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<div id="editModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%);
+  background:#fff; padding:20px; border:1px solid #ccc; border-radius:8px; z-index:9999; box-shadow:0 0 10px rgba(0,0,0,0.2);">
+  <form method="POST" id="editLotForm" action="{{ url_for('main.edit_lot') }}">
+    <input type="hidden" name="lot_id" id="modal_lot_id">
+
+    <label>Name:</label><br>
+    <input type="text" name="name" id="modal_name" required><br><br>
+
+    <label>Address:</label><br>
+    <input type="text" name="address" id="modal_address" required><br><br>
+
+    <label>Pincode:</label><br>
+    <input type="text" name="pincode" id="modal_pincode" required><br><br>
+
+    <label>Max Spots:</label><br>
+    <input type="number" name="max_spots" id="modal_max_spots" required><br><br>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+  </form>
+
+  <form method="POST" id="modalDeleteForm" style="margin-top:10px;">
+    <button type="submit" class="btn btn-danger">Delete Lot</button>
+  </form>
+
+  <button type="button" onclick="closeEditModal()" class="btn btn-secondary mt-2">Cancel</button>
+</div>
+
+<script>
+  function openEditModal(id, name, address, pincode, maxSpots) {
+    document.getElementById("modal_lot_id").value = id;
+    document.getElementById("modal_name").value = name;
+    document.getElementById("modal_address").value = address;
+    document.getElementById("modal_pincode").value = pincode;
+    document.getElementById("modal_max_spots").value = maxSpots;
+    document.getElementById("modalDeleteForm").action = "/admin/delete-lot/" + id;
+    document.getElementById("editModal").style.display = "block";
+  }
+
+  function closeEditModal() {
+    document.getElementById("editModal").style.display = "none";
+  }
+</script>
+{% endblock %}

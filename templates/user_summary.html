@@ -1,0 +1,72 @@
+{% extends "core.html" %}
+
+{% block title %}User Summary{% endblock %}
+
+{% block content %}
+<h2>Parking Summary</h2>
+
+<p><strong>Total Bookings:</strong> {{ total_bookings }}</p>
+<p><strong>Total Hours Parked:</strong> {{ total_hours }} hrs</p>
+<p><strong>Total Amount Paid:</strong> ₹{{ total_cost }}</p>
+
+<label for="chartType">Choose Chart Type:</label>
+<select id="chartType" onchange="updateChartType()">
+  <option value="bar">Bar</option>
+  <option value="line">Line</option>
+  <option value="pie">Pie</option>
+  <option value="doughnut">Doughnut</option>
+</select>
+
+<div style="width: 800px; height: 500px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; background: #f9f9f9;">
+  <canvas id="bookingChart" style="width: 100%; height: 100%;"></canvas>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const chartLabels = {{ labels | tojson }};
+  const chartData = {{ data | tojson }};
+  const chartColors = {{ colors | tojson }};
+
+  let currentChart;
+
+  function renderChart(type) {
+    const ctx = document.getElementById("bookingChart").getContext("2d");
+
+    if (currentChart) {
+      currentChart.destroy();
+    }
+
+    currentChart = new Chart(ctx, {
+      type: type,
+      data: {
+        labels: chartLabels,
+        datasets: [{
+          label: "Hours Parked",
+          data: chartData,
+          backgroundColor: chartColors,
+          borderColor: chartColors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: (type === 'bar' || type === 'line') ? {
+          y: { beginAtZero: true }
+        } : {}
+      }
+    });
+  }
+
+  function updateChartType() {
+    const selectedType = document.getElementById("chartType").value;
+    renderChart(selectedType);
+  }
+
+  renderChart('bar');
+</script>
+
+<br>
+
+{% endblock %}

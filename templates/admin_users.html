@@ -1,0 +1,35 @@
+{% extends "admin_core.html" %}
+{% block title %}All Users{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Registered Users</h2>
+
+  {% if users %}
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>ID</th>
+          <th>Username</th>
+          <th>Full Name</th>
+          <th>Address</th>
+          <th>Pincode</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.username }}</td>
+          <td>{{ user.full_name }}</td>
+          <td>{{ user.address }}</td>
+          <td>{{ user.pincode }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="text-muted">No users found.</p>
+  {% endif %}
+</div>
+{% endblock %}

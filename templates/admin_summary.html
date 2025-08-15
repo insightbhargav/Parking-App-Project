@@ -1,0 +1,54 @@
+{% extends "admin_core.html" %}
+{% block title %}Admin Summary{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Parking Lot Summary</h2>
+
+  <div class="d-flex justify-content-center mb-5">
+    <div style="width: 700px; height: 400px;">
+      <canvas id="spotChart"></canvas>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="d-flex justify-content-center">
+    <div style="width: 700px; height: 400px;">
+      <canvas id="revenueChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const spotChart = new Chart(document.getElementById('spotChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ spot_data | map(attribute='name') | list | tojson }},
+      datasets: [
+        {
+          label: 'Free Spots',
+          backgroundColor: 'lightgreen',
+          data: {{ spot_data | map(attribute='free') | list | tojson }}
+        },
+        {
+          label: 'Occupied Spots',
+          backgroundColor: 'salmon',
+          data: {{ spot_data | map(attribute='occupied') | list | tojson }}
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        title: { display: true, text: 'Spot Availability' }
+      }
+    }
+  });
+
+
+</script>
+{% endblock %}
